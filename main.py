@@ -6,6 +6,9 @@ app = FastAPI(title="Gym Members API")
 # Load Excel
 df = pd.read_excel("gym_members.xlsx")
 
+df = df.fillna('')  # Replace NaN with empty string for JSON serialization
+df["JoinDate"] = df["JoinDate"].astype(str)
+
 # Initialize Git repo
 repo = git.Repo('.')
 
@@ -24,8 +27,10 @@ def commit_changes(message):
         print(f"Push failed: {e}")  # For debugging, but in API, perhaps log
 
 @app.get("/members")
-def get_all_members():
-    return df.to_dict(orient="records")
+def get_all_members(skip: int = 0, limit: int = 50):
+    total = len(df)
+    data = df.iloc[skip:skip+limit].to_dict(orient="records")
+    return {"data": data, "skip": skip, "limit": limit, "total": total}
 
 @app.get("/member/{member_id}")
 def get_member(member_id: int):
