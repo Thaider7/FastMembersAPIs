@@ -32,7 +32,13 @@ def get_member(member_id: int):
     member = df[df["MemberID"] == member_id]
     if member.empty:
         raise HTTPException(status_code=404, detail="Member not found")
-    return member.to_dict(orient="records")[0]
+    result = member.to_dict(orient="records")[0]
+
+# convert JoinDate to string
+    result["JoinDate"] = str(result["JoinDate"])
+
+    return result
+
 
 @app.post("/member/")
 def add_member(member: dict):
